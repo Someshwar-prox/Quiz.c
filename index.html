@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>C Programming Quiz - Semester Exam Practice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .quiz-container {
+            padding: 25px;
+            min-height: 400px;
+        }
+
+        .question-counter {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border: 2px solid #e9ecef;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db 0%, #2ecc71 100%);
+            width: 4%;
+            transition: width 0.3s ease;
+        }
+
+        .question-box {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #3498db;
+        }
+
+        .question-text {
+            font-size: 20px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #2c3e50;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .option.selected {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
+        .option.correct {
+            border-color: #2ecc71;
+            background: #d4edda;
+        }
+
+        .option.wrong {
+            border-color: #e74c3c;
+            background: #f8d7da;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 16px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 60px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .hint-btn {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .score-board {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .solution-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 5px solid #3498db;
+            display: none;
+        }
+
+        .solution-box.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .solution-box h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .hint-box {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #f39c12;
+            display: none;
+        }
+
+        .hint-box.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .result-screen {
+            display: none;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .result-screen.show {
+            display: block;
+            animation: fadeIn 1s ease;
+        }
+
+        .result-header {
+            font-size: 36px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .final-score {
+            font-size: 48px;
+            color: #3498db;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .performance-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .topic-performance {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .improvement-tips {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 18px 40px;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        .timer {
+            font-size: 20px;
+            color: #e74c3c;
+            font-weight: bold;
+            background: #f8d7da;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .quiz-container {
+                padding: 15px;
+            }
+            
+            .question-box {
+                padding: 20px;
+            }
+            
+            .question-text {
+                font-size: 18px;
+            }
+            
+            .option {
+                padding: 15px;
+                font-size: 16px;
+                min-height: 55px;
+            }
+            
+            button {
+                padding: 14px;
+                font-size: 16px;
+                min-height: 55px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .question-text {
+                font-size: 17px;
+            }
+            
+            .option {
+                font-size: 15px;
+            }
+            
+            button {
+                font-size: 15px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 C Programming Quiz</h1>
+            <p>Semester Exam Preparation - 25 Questions | Score: +4 Correct, -1 Wrong, -2 Hint</p>
+        </div>
+
+        <div class="quiz-container">
+            <div class="question-counter">
+                <span>Question: <span id="current-question">1</span>/25</span>
+                <span class="timer" id="timer">Time: 60s</span>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <div class="score-board" id="score-board">
+                Score: 0 | Total: 100
+            </div>
+            
+            <div id="question-container">
+                <div class="question-box">
+                    <div class="question-text" id="question-text">Loading question...</div>
+                    <div class="options-container" id="options-container">
+                        <div class="option">Loading options...</div>
+                    </div>
+                </div>
+                
+                <div class="hint-box" id="hint-box">
+                    <strong>💡 Hint:</strong> <span id="hint-text"></span>
+                </div>
+                
+                <div class="solution-box" id="solution-box">
+                    <h4>📖 Solution & Explanation</h4>
+                    <p id="solution-text"></p>
+                </div>
+                
+                <div class="button-group">
+                    <button class="hint-btn" id="hint-btn" onclick="showHint()">💡 Get Hint (-2 marks)</button>
+                    <button class="submit-btn" id="submit-btn" onclick="submitAnswer()" disabled>✅ Submit Answer</button>
+                </div>
+            </div>
+            
+            <div class="result-screen" id="result-screen">
+                <h2 class="result-header">🎉 Quiz Completed!</h2>
+                <div class="final-score" id="final-score">0/100</div>
+                
+                <div class="performance-section">
+                    <h3>📊 Performance Analysis</h3>
+                    <div id="topic-analysis"></div>
+                </div>
+                
+                <div class="improvement-tips">
+                    <h3>🚀 How to Improve</h3>
+                    <div id="improvement-tips"></div>
+                </div>
+                
+                <button class="restart-btn" onclick="restartQuiz()">🔄 Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Audio handling
+        class AudioManager {
+            constructor() {
+                this.sounds = {
+                    correct: new Audio('assets/sounds/correct.mp3'),
+                    wrong: new Audio('assets/sounds/wrong.mp3'),
+                    bgm: new Audio('assets/sounds/bgm.mp3')
+                };
+                
+                // Set BGM to loop
+                this.sounds.bgm.loop = true;
+                this.isBGMPlaying = false;
+            }
+            
+            play(sound) {
+                try {
+                    this.sounds[sound].currentTime = 0;
+                    this.sounds[sound].play().catch(e => console.log("Audio play failed:", e));
+                } catch (e) {
+                    console.log("Audio error:", e);
+                }
+            }
+            
+            playBGM() {
+                if (!this.isBGMPlaying) {
+                    this.play('bgm');
+                    this.isBGMPlaying = true;
+                }
+            }
+        }
+
+        // Quiz questions database (25 questions covering all syllabus topics)
+        const quizQuestions = [
+            // Introduction to C (3 questions)
+            {
+                id: 1,
+                question: "What is the basic structure of a C program?",
+                options: [
+                    "Documentation → Link → Definition → Global Declaration → main() → Subprograms",
+                    "Preprocessor → Global Declaration → main() → User-defined functions",
+                    "Header files → Variable declaration → main() function → Code execution",
+                    "Include files → Main function → Function definitions → Return statement"
+                ],
+                correct: 0,
+                hint: "The structure follows a specific order starting with documentation section.",
+                solution: "The correct structure is: Documentation section → Link section → Definition section → Global declaration section → main() function → Subprogram section. This is the standard structure as per ANSI C.",
+                topic: "Introduction to C"
+            },
+            {
+                id: 2,
+                question: "Which of the following is NOT a valid C variable name?",
+                options: [
+                    "_variable123",
+                    "123variable",
+                    "variable_name",
+                    "VariableName"
+                ],
+                correct: 1,
+                hint: "Variable names cannot start with a number.",
+                solution: "'123variable' is invalid because variable names in C cannot start with a digit. They must begin with a letter or underscore, followed by letters, digits, or underscores.",
+                topic: "Introduction to C"
+            },
+            {
+                id: 3,
+                question: "What will be the result of: int a = 5; float b = 2; printf(\"%f\", a/b);",
+                options: [
+                    "2.000000",
+                    "2.500000",
+                    "2",
+                    "Compilation error"
+                ],
+                correct: 1,
+                hint: "Integer divided by float results in float due to implicit type conversion.",
+                solution: "When an integer is divided by a float, the integer is implicitly converted to float (type promotion), resulting in 5.0/2.0 = 2.5. printf with %f displays 2.500000.",
+                topic: "Type Conversions"
+            },
+
+            // Operators and Expressions (3 questions)
+            {
+                id: 4,
+                question: "What is the output of: printf(\"%d\", 5 + 3 * 2 - 4 / 2);",
+                options: [
+                    "8",
+                    "9",
+                    "10",
+                    "11"
+                ],
+                correct: 1,
+                hint: "Remember operator precedence: * and / before + and -.",
+                solution: "Following operator precedence: 3*2=6, 4/2=2. Then: 5 + 6 - 2 = 9.",
+                topic: "Operators and Expressions"
+            },
+            {
+                id: 5,
+                question: "What is the value of x after: int x = 5; x += x++ + ++x;",
+                options: [
+                    "12",
+                    "13",
+                    "14",
+                    "Undefined behavior"
+                ],
+                correct: 3,
+                hint: "Multiple modifications of same variable between sequence points leads to undefined behavior.",
+                solution: "This expression has undefined behavior in C because the variable 'x' is modified multiple times between sequence points. Different compilers may produce different results.",
+                topic: "Operators and Expressions"
+            },
+            {
+                id: 6,
+                question: "Which operator has the highest precedence?",
+                options: [
+                    "++ (post-increment)",
+                    "! (logical NOT)",
+                    "* (multiplication)",
+                    "() (parentheses)"
+                ],
+                correct: 3,
+                hint: "Parentheses have the highest precedence to force evaluation order.",
+                solution: "Parentheses () have the highest precedence in C, followed by postfix operators like ++ and --, then unary operators like !, then multiplication/division, etc.",
+                topic: "Arithmetic Precedence"
+            },
+
+            // Input/Output Operations (2 questions)
+            {
+                id: 7,
+                question: "What will be output for: printf(\"%5.2f\", 123.4567);",
+                options: [
+                    "123.45",
+                    "123.46",
+                    "123.4567",
+                    " 123.46"
+                ],
+                correct: 3,
+                hint: "%5.2f means total width 5 with 2 decimal places.",
+                solution: "%5.2f formats the number with total width of 5 characters and 2 decimal places. 123.46 requires 6 characters, so it will be printed as is with one leading space: ' 123.46'.",
+                topic: "Formatted Output"
+            },
+            {
+                id: 8,
+                question: "What does scanf(\"%[^\\n]\", str); do?",
+                options: [
+                    "Reads until newline",
+                    "Reads including newline",
+                    "Reads only alphabets",
+                    "Reads until space"
+                ],
+                correct: 0,
+                hint: "%[^\\n] is a scanset that reads all characters except newline.",
+                solution: "scanf(\"%[^\\n]\", str); reads a string until it encounters a newline character (but doesn't include the newline). This is useful for reading strings with spaces.",
+                topic: "Formatted Input"
+            },
+
+            // Decision Making and Branching (4 questions)
+            {
+                id: 9,
+                question: "What is the output of: int x = 0; if(x = 0) printf(\"Yes\"); else printf(\"No\");",
+                options: [
+                    "Yes",
+                    "No",
+                    "Compilation error",
+                    "Runtime error"
+                ],
+                correct: 1,
+                hint: "x = 0 is assignment, not comparison. Assignment returns the assigned value.",
+                solution: "x = 0 assigns 0 to x, and the expression evaluates to 0 (false). So the else block executes, printing 'No'.",
+                topic: "Decision Making"
+            },
+            {
+                id: 10,
+                question: "Which is equivalent to: if(a>b) max=a; else max=b;",
+                options: [
+                    "max = (a>b)?a:b;",
+                    "max = a>b?a:b;",
+                    "Both a and b",
+                    "None of these"
+                ],
+                correct: 2,
+                hint: "The ternary operator ?: is the conditional operator.",
+                solution: "Both options use the ternary operator. Option b is valid because parentheses are optional when the expression is simple. The ternary operator returns a if a>b is true, otherwise returns b.",
+                topic: "Decision Making"
+            },
+            {
+                id: 11,
+                question: "In switch statement, what happens if there's no break?",
+                options: [
+                    "Compilation error",
+                    "Only one case executes",
+                    "Execution falls through to next case",
+                    "Returns to default"
+                ],
+                correct: 2,
+                hint: "break is used to exit the switch block.",
+                solution: "Without break, execution will 'fall through' to the next case statement. This is sometimes used intentionally for multiple cases that should execute the same code.",
+                topic: "switch statement"
+            },
+            {
+                id: 12,
+                question: "What is the purpose of goto statement?",
+                options: [
+                    "Function call",
+                    "Unconditional jump",
+                    "Conditional jump",
+                    "Loop control"
+                ],
+                correct: 1,
+                hint: "goto transfers control unconditionally.",
+                solution: "The goto statement performs an unconditional jump to a labeled statement in the same function. It's generally avoided in structured programming but can be useful in some situations like breaking out of nested loops.",
+                topic: "GOTO statement"
+            },
+
+            // Looping (3 questions)
+            {
+                id: 13,
+                question: "How many times will this loop execute: for(i=0; i<=10; i+=2);",
+                options: [
+                    "5",
+                    "6",
+                    "10",
+                    "11"
+                ],
+                correct: 1,
+                hint: "Count the values: 0,2,4,6,8,10",
+                solution: "The loop executes for i = 0, 2, 4, 6, 8, 10 → total 6 times. When i becomes 12, the condition i<=10 becomes false.",
+                topic: "for statement"
+            },
+            {
+                id: 14,
+                question: "What is the difference between while and do-while?",
+                options: [
+                    "Syntax difference only",
+                    "do-while always executes at least once",
+                    "while is faster",
+                    "No difference"
+                ],
+                correct: 1,
+                hint: "do-while checks condition after executing the loop body.",
+                solution: "The key difference is that do-while executes the loop body at least once before checking the condition, while while checks the condition first and may not execute at all if the condition is initially false.",
+                topic: "Loops"
+            },
+            {
+                id: 15,
+                question: "What does break do in a loop?",
+                options: [
+                    "Skips current iteration",
+                    "Exits the loop entirely",
+                    "Restarts the loop",
+                    "Continues to next iteration"
+                ],
+                correct: 1,
+                hint: "break terminates the innermost loop or switch.",
+                solution: "The break statement immediately terminates the innermost loop (while, do-while, for) or switch statement and transfers control to the statement following the terminated statement.",
+                topic: "Jumps in Loops"
+            },
+
+            // Arrays & Strings (4 questions)
+            {
+                id: 16,
+                question: "How to initialize all elements of array to 0?",
+                options: [
+                    "int arr[5] = {0};",
+                    "int arr[5] = {0,0,0,0,0};",
+                    "Both a and b",
+                    "Cannot be initialized"
+                ],
+                correct: 2,
+                hint: "Partial initialization sets remaining elements to 0.",
+                solution: "Both methods work. int arr[5] = {0}; initializes first element to 0 and all others automatically become 0. Explicit initialization with all zeros also works.",
+                topic: "Arrays"
+            },
+            {
+                id: 17,
+                question: "What is strcpy() used for?",
+                options: [
+                    "Compare strings",
+                    "Copy strings",
+                    "Concatenate strings",
+                    "Find string length"
+                ],
+                correct: 1,
+                hint: "strcpy = string copy.",
+                solution: "strcpy(dest, src) copies the source string to destination including the null terminator. It's from string.h header.",
+                topic: "String handling functions"
+            },
+            {
+                id: 18,
+                question: "How to declare a 2D array of 3 rows and 4 columns?",
+                options: [
+                    "int arr[3,4];",
+                    "int arr[3][4];",
+                    "int arr(3,4);",
+                    "int arr{3}{4};"
+                ],
+                correct: 1,
+                hint: "2D arrays use separate brackets for each dimension.",
+                solution: "int arr[3][4]; declares a 2D array with 3 rows and 4 columns. Total elements = 3 × 4 = 12 integers.",
+                topic: "Two-dimensional Arrays"
+            },
+            {
+                id: 19,
+                question: "What is the difference between 'a' and \"a\"?",
+                options: [
+                    "No difference",
+                    "'a' is char, \"a\" is string",
+                    "'a' is string, \"a\" is char",
+                    "Both are strings"
+                ],
+                correct: 1,
+                hint: "Single quotes for characters, double quotes for strings.",
+                solution: "'a' is a character literal (type char), while \"a\" is a string literal (type char array) that contains 'a' followed by null terminator '\\0'.",
+                topic: "Character Arrays"
+            },
+
+            // Functions (3 questions)
+            {
+                id: 20,
+                question: "What is function prototype?",
+                options: [
+                    "Function definition",
+                    "Function declaration",
+                    "Function call",
+                    "Function body"
+                ],
+                correct: 1,
+                hint: "Prototype declares function signature before definition.",
+                solution: "A function prototype declares the function's name, return type, and parameters without providing the body. It allows the compiler to check function calls before the function is defined.",
+                topic: "Function Declaration"
+            },
+            {
+                id: 21,
+                question: "What is recursion?",
+                options: [
+                    "Looping construct",
+                    "Function calling itself",
+                    "Multiple functions",
+                    "Function pointers"
+                ],
+                correct: 1,
+                hint: "Recursion = function calls itself.",
+                solution: "Recursion is when a function calls itself directly or indirectly. It must have a base case to terminate, otherwise it leads to infinite recursion and stack overflow.",
+                topic: "Recursion"
+            },
+            {
+                id: 22,
+                question: "What is scope of a variable?",
+                options: [
+                    "Memory location",
+                    "Lifetime",
+                    "Visibility region",
+                    "Data type"
+                ],
+                correct: 2,
+                hint: "Scope determines where a variable can be accessed.",
+                solution: "Scope refers to the region of the program where a variable is visible and can be accessed. Variables can have local scope (within function) or global scope (entire program).",
+                topic: "Scope of variables"
+            },
+
+            // Pointers (3 questions)
+            {
+                id: 23,
+                question: "What does *ptr represent?",
+                options: [
+                    "Address of ptr",
+                    "Value at address stored in ptr",
+                    "Pointer to ptr",
+                    "Size of ptr"
+                ],
+                correct: 1,
+                hint: "* is dereference operator.",
+                solution: "If ptr is a pointer variable, *ptr dereferences the pointer and gives the value stored at the memory address contained in ptr.",
+                topic: "Pointers"
+            },
+            {
+                id: 24,
+                question: "What is array name in pointer context?",
+                options: [
+                    "Pointer to first element",
+                    "Pointer to last element",
+                    "Not a pointer",
+                    "Constant pointer"
+                ],
+                correct: 3,
+                hint: "Array name decays to pointer but cannot be modified.",
+                solution: "An array name, in most contexts, decays to a constant pointer to the first element of the array. It cannot be modified to point elsewhere (unlike regular pointer variables).",
+                topic: "Pointers and arrays"
+            },
+
+            // Structures and File Handling (2 questions)
+            {
+                id: 25,
+                question: "Which is correct for structure definition?",
+                options: [
+                    "struct student {int id; char name[20];};",
+                    "student struct {int id; char name[20];};",
+                    "struct {int id; char name[20];} student;",
+                    "Both a and c"
+                ],
+                correct: 3,
+                hint: "struct keyword comes first, followed by tag (optional) and members.",
+                solution: "Both a and c are valid. Option a defines a structure type named student. Option c defines an unnamed structure and declares a variable student of that type.",
+                topic: "Structures"
+            }
+        ];
+
+        // Quiz state
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOption = null;
+        let usedHint = false;
+        let timeLeft = 60;
+        let timerInterval;
+        let topicScores = {};
+        let audioManager;
+
+        // Initialize quiz
+        function initQuiz() {
+            audioManager = new AudioManager();
+            audioManager.playBGM();
+            
+            // Initialize topic scores
+            const topics = [...new Set(quizQuestions.map(q => q.topic))];
+            topics.forEach(topic => {
+                topicScores[topic] = { correct: 0, total: 0 };
+            });
+            
+            loadQuestion();
+            startTimer();
+        }
+
+        // Load current question
+        function loadQuestion() {
+            const question = quizQuestions[currentQuestion];
+            
+            // Update UI
+            document.getElementById('current-question').textContent = currentQuestion + 1;
+            document.getElementById('question-text').textContent = question.question;
+            document.getElementById('progress').style.width = `${((currentQuestion + 1) / 25) * 100}%`;
+            
+            // Load options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = `${String.fromCharCode(65 + index)}) ${option}`;
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Reset state
+            selectedOption = null;
+            usedHint = false;
+            document.getElementById('hint-box').classList.remove('show');
+            document.getElementById('solution-box').classList.remove('show');
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('hint-btn').disabled = false;
+            document.getElementById('hint-btn').innerHTML = '💡 Get Hint (-2 marks)';
+            
+            // Update topic stats
+            const currentTopic = question.topic;
+            document.getElementById('score-board').innerHTML = 
+                `Score: ${score} | Topic: ${currentTopic}`;
+            
+            // Reset timer
+            resetTimer();
+        }
+
+        // Select an option
+        function selectOption(index) {
+            // Deselect previous
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Select new
+            document.querySelectorAll('.option')[index].classList.add('selected');
+            selectedOption = index;
+            document.getElementById('submit-btn').disabled = false;
+        }
+
+        // Show hint
+        function showHint() {
+            if (usedHint) return;
+            
+            usedHint = true;
+            const hintBox = document.getElementById('hint-box');
+            const hintText = document.getElementById('hint-text');
+            const question = quizQuestions[currentQuestion];
+            
+            hintText.textContent = question.hint;
+            hintBox.classList.add('show');
+            document.getElementById('hint-btn').innerHTML = '💡 Hint Used (-2 marks)';
+            document.getElementById('hint-btn').disabled = true;
+            
+            audioManager.play('correct');
+        }
+
+        // Submit answer
+        function submitAnswer() {
+            if (selectedOption === null) return;
+            
+            clearInterval(timerInterval);
+            
+            const question = quizQuestions[currentQuestion];
+            const isCorrect = selectedOption === question.correct;
+            
+            // Calculate marks
+            let marksEarned = 0;
+            if (isCorrect) {
+                marksEarned = usedHint ? 2 : 4;
+                score += marksEarned;
+                audioManager.play('correct');
+            } else {
+                marksEarned = -1;
+                score -= 1;
+                audioManager.play('wrong');
+            }
+            
+            // Update topic score
+            topicScores[question.topic].total++;
+            if (isCorrect) {
+                topicScores[question.topic].correct++;
+            }
+            
+            // Show correct/wrong highlighting
+            document.querySelectorAll('.option').forEach((opt, index) => {
+                if (index === question.correct) {
+                    opt.classList.add('correct');
+                } else if (index === selectedOption && !isCorrect) {
+                    opt.classList.add('wrong');
+                }
+            });
+            
+            // Show solution
+            const solutionBox = document.getElementById('solution-box');
+            const solutionText = document.getElementById('solution-text');
+            solutionText.textContent = `${question.solution} (${isCorrect ? '+' : ''}${marksEarned} marks)`;
+            solutionBox.classList.add('show');
+            
+            // Disable buttons
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('hint-btn').disabled = true;
+            
+            // Update score display
+            document.getElementById('score-board').innerHTML = 
+                `Score: ${score} | ${isCorrect ? 'Correct!' : 'Wrong!'} (${isCorrect ? '+' : ''}${marksEarned})`;
+            
+            // Move to next question or show results
+            setTimeout(() => {
+                if (currentQuestion < quizQuestions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 3000);
+        }
+
+        // Timer functions
+        function startTimer() {
+            resetTimer();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = `Time: ${timeLeft}s`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 60;
+            document.getElementById('timer').textContent = `Time: ${timeLeft}s`;
+            startTimer();
+        }
+
+        function timeUp() {
+            audioManager.play('wrong');
+            document.getElementById('submit-btn').disabled = true;
+            selectedOption = null;
+            
+            const question = quizQuestions[currentQuestion];
+            topicScores[question.topic].total++;
+            
+            // Show correct answer
+            document.querySelectorAll('.option').forEach((opt, index) => {
+                if (index === question.correct) {
+                    opt.classList.add('correct');
+                }
+            });
+            
+            // Show solution
+            const solutionBox = document.getElementById('solution-box');
+            const solutionText = document.getElementById('solution-text');
+            solutionText.textContent = `${question.solution} (Time's up! -1 mark)`;
+            solutionBox.classList.add('show');
+            
+            score -= 1;
+            
+            setTimeout(() => {
+                if (currentQuestion < quizQuestions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 3000);
+        }
+
+        // Show final results
+        function showResults() {
+            clearInterval(timerInterval);
+            
+            // Hide quiz container
+            document.getElementById('question-container').style.display = 'none';
+            
+            // Show result screen
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.classList.add('show');
+            
+            // Calculate percentages
+            let topicAnalysis = '';
+            let weakTopics = [];
+            let strongTopics = [];
+            
+            Object.keys(topicScores).forEach(topic => {
+                const stats = topicScores[topic];
+                if (stats.total > 0) {
+                    const percentage = Math.round((stats.correct / stats.total) * 100);
+                    const performance = percentage >= 80 ? 'Excellent' : 
+                                      percentage >= 60 ? 'Good' : 
+                                      percentage >= 40 ? 'Needs Practice' : 'Weak';
+                    
+                    const color = percentage >= 80 ? '#2ecc71' : 
+                                 percentage >= 60 ? '#3498db' : 
+                                 percentage >= 40 ? '#f39c12' : '#e74c3c';
+                    
+                    topicAnalysis += `
+                        <div class="topic-performance" style="border-left-color: ${color};">
+                            <strong>${topic}</strong><br>
+                            ${stats.correct}/${stats.total} correct (${percentage}%) - ${performance}
+                        </div>
+                    `;
+                    
+                    if (percentage < 60) weakTopics.push(topic);
+                    if (percentage >= 80) strongTopics.push(topic);
+                }
+            });
+            
+            document.getElementById('topic-analysis').innerHTML = topicAnalysis;
+            document.getElementById('final-score').textContent = `${score}/100`;
+            
+            // Generate improvement tips
+            let improvementTips = '';
+            if (score >= 80) {
+                improvementTips = `
+                    <p>🎯 <strong>Excellent Performance!</strong> You have strong understanding of C programming.</p>
+                    <p>📚 <strong>Next Steps:</strong> Practice advanced concepts and solve complex programming problems.</p>
+                `;
+            } else if (score >= 60) {
+                improvementTips = `
+                    <p>👍 <strong>Good Job!</strong> You have a solid foundation.</p>
+                    <p>🔍 <strong>Focus Areas:</strong> ${weakTopics.join(', ')}</p>
+                    <p>📖 <strong>Study Tips:</strong> Review the textbook chapters for weak topics and practice more examples.</p>
+                `;
+            } else if (score >= 40) {
+                improvementTips = `
+                    <p>📘 <strong>Needs More Practice</strong> - Focus on core concepts.</p>
+                    <p>🎯 <strong>Weak Areas:</strong> ${weakTopics.join(', ')}</p>
+                    <p>📚 <strong>Action Plan:</strong> 
+                        1. Study one topic daily from Balagurusamy<br>
+                        2. Write and execute all example programs<br>
+                        3. Solve exercise problems<br>
+                        4. Take notes of important concepts</p>
+                `;
+            } else {
+                improvementTips = `
+                    <p>📚 <strong>Intensive Revision Needed</strong></p>
+                    <p>🚨 <strong>Critical Areas:</strong> ${weakTopics.join(', ')}</p>
+                    <p>💡 <strong>Strategy:</strong>
+                        1. Start with basic programs<br>
+                        2. Understand each concept thoroughly<br>
+                        3. Practice daily for 2 hours<br>
+                        4. Use reference books: Let Us C by Kanetkar<br>
+                        5. Join study groups for doubt clearing</p>
+                `;
+            }
+            
+            document.getElementById('improvement-tips').innerHTML = improvementTips;
+        }
+
+        // Restart quiz
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            
+            // Reset topic scores
+            Object.keys(topicScores).forEach(topic => {
+                topicScores[topic] = { correct: 0, total: 0 };
+            });
+            
+            // Hide result screen
+            document.getElementById('result-screen').classList.remove('show');
+            
+            // Show quiz container
+            document.getElementById('question-container').style.display = 'block';
+            
+            // Reload first question
+            loadQuestion();
+        }
+
+        // Initialize on load
+        window.onload = initQuiz;
+
+        // Prevent zoom on mobile
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Prevent context menu on mobile
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>
