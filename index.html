@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>C Programming Quiz - Semester Exam Practice</title>
     <style>
+        /* ... (keep all the CSS styles from previous code - they're perfect) ... */
         * {
             margin: 0;
             padding: 0;
@@ -285,6 +286,28 @@
             display: inline-block;
         }
 
+        .start-screen {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px 50px;
+            font-size: 24px;
+            margin: 30px 0;
+            border-radius: 15px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -381,7 +404,26 @@
             <p>Semester Exam Preparation - 25 Questions | Score: +4 Correct, -1 Wrong, -2 Hint</p>
         </div>
 
-        <div class="quiz-container">
+        <div id="start-screen" class="start-screen">
+            <h2>Welcome to C Programming Quiz!</h2>
+            <div class="instructions">
+                <h3>📋 Instructions:</h3>
+                <p>✅ <strong>25 Questions</strong> covering all semester syllabus topics</p>
+                <p>✅ <strong>Scoring System:</strong></p>
+                <ul>
+                    <li>+4 marks for correct answer</li>
+                    <li>-1 mark for wrong answer</li>
+                    <li>+2 marks if using hint (costs 2 marks)</li>
+                </ul>
+                <p>✅ <strong>Timer:</strong> 60 seconds per question</p>
+                <p>✅ <strong>Topics Covered:</strong> Based on Balagurusamy Textbook</p>
+                <p>✅ <strong>Detailed Analysis</strong> after quiz completion</p>
+            </div>
+            <button class="start-btn" onclick="startQuiz()">🚀 Start Quiz</button>
+            <p style="margin-top: 20px; color: #666;">Click anywhere to enable audio for better experience</p>
+        </div>
+
+        <div class="quiz-container" id="quiz-container" style="display: none;">
             <div class="question-counter">
                 <span>Question: <span id="current-question">1</span>/25</span>
                 <span class="timer" id="timer">Time: 60s</span>
@@ -438,37 +480,6 @@
     </div>
 
     <script>
-        // Audio handling
-        class AudioManager {
-            constructor() {
-                this.sounds = {
-                    correct: new Audio('assets/sounds/correct.mp3'),
-                    wrong: new Audio('assets/sounds/wrong.mp3'),
-                    bgm: new Audio('assets/sounds/bgm.mp3')
-                };
-                
-                // Set BGM to loop
-                this.sounds.bgm.loop = true;
-                this.isBGMPlaying = false;
-            }
-            
-            play(sound) {
-                try {
-                    this.sounds[sound].currentTime = 0;
-                    this.sounds[sound].play().catch(e => console.log("Audio play failed:", e));
-                } catch (e) {
-                    console.log("Audio error:", e);
-                }
-            }
-            
-            playBGM() {
-                if (!this.isBGMPlaying) {
-                    this.play('bgm');
-                    this.isBGMPlaying = true;
-                }
-            }
-        }
-
         // Quiz questions database (25 questions covering all syllabus topics)
         const quizQuestions = [
             // Introduction to C (3 questions)
@@ -846,14 +857,69 @@
         let selectedOption = null;
         let usedHint = false;
         let timeLeft = 60;
-        let timerInterval;
+        let timerInterval = null;
         let topicScores = {};
         let audioManager;
+        let quizStarted = false;
 
         // Initialize quiz
         function initQuiz() {
-            audioManager = new AudioManager();
-            audioManager.playBGM();
+            // Initialize audio manager
+            audioManager = {
+                sounds: {},
+                isBGMPlaying: false,
+                
+                init: function() {
+                    // Create audio elements
+                    this.sounds.correct = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+                    this.sounds.wrong = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3');
+                    this.sounds.bgm = new Audio('https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3');
+                    
+                    // Set BGM to loop
+                    this.sounds.bgm.loop = true;
+                    
+                    // Preload audio
+                    Object.values(this.sounds).forEach(sound => {
+                        sound.load();
+                        sound.volume = 0.5;
+                    });
+                },
+                
+                play: function(sound) {
+                    if (!this.sounds[sound]) return;
+                    
+                    try {
+                        // Reset and play
+                        this.sounds[sound].currentTime = 0;
+                        const playPromise = this.sounds[sound].play();
+                        
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log("Audio play failed (will work after user interaction):", error);
+                            });
+                        }
+                    } catch (e) {
+                        console.log("Audio error:", e);
+                    }
+                },
+                
+                playBGM: function() {
+                    if (!this.isBGMPlaying && quizStarted) {
+                        this.play('bgm');
+                        this.isBGMPlaying = true;
+                    }
+                },
+                
+                stopBGM: function() {
+                    if (this.sounds.bgm) {
+                        this.sounds.bgm.pause();
+                        this.sounds.bgm.currentTime = 0;
+                        this.isBGMPlaying = false;
+                    }
+                }
+            };
+            
+            audioManager.init();
             
             // Initialize topic scores
             const topics = [...new Set(quizQuestions.map(q => q.topic))];
@@ -861,8 +927,35 @@
                 topicScores[topic] = { correct: 0, total: 0 };
             });
             
+            // Enable audio after any user interaction
+            document.addEventListener('click', function enableAudio() {
+                if (!quizStarted) return;
+                
+                // Try to play a silent audio to unlock audio context
+                const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ');
+                silentAudio.volume = 0.001;
+                silentAudio.play().then(() => {
+                    audioManager.playBGM();
+                }).catch(() => {});
+                
+                // Remove listener after first interaction
+                document.removeEventListener('click', enableAudio);
+            });
+        }
+
+        // Start quiz
+        function startQuiz() {
+            quizStarted = true;
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'block';
+            
             loadQuestion();
             startTimer();
+            
+            // Try to start audio after user interaction
+            setTimeout(() => {
+                audioManager.playBGM();
+            }, 1000);
         }
 
         // Load current question
@@ -939,6 +1032,7 @@
             if (selectedOption === null) return;
             
             clearInterval(timerInterval);
+            timerInterval = null;
             
             const question = quizQuestions[currentQuestion];
             const isCorrect = selectedOption === question.correct;
@@ -995,25 +1089,53 @@
             }, 3000);
         }
 
-        // Timer functions
+        // Timer functions - FIXED: No recursion
         function startTimer() {
-            resetTimer();
+            // Clear any existing timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timeLeft = 60;
+            updateTimerDisplay();
+            
             timerInterval = setInterval(() => {
                 timeLeft--;
-                document.getElementById('timer').textContent = `Time: ${timeLeft}s`;
+                updateTimerDisplay();
                 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
+                    timerInterval = null;
                     timeUp();
                 }
             }, 1000);
         }
 
         function resetTimer() {
-            clearInterval(timerInterval);
-            timeLeft = 60;
-            document.getElementById('timer').textContent = `Time: ${timeLeft}s`;
+            // Clear existing timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Start new timer
             startTimer();
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Time: ${timeLeft}s`;
+            
+            // Change color when time is running out
+            if (timeLeft <= 10) {
+                document.getElementById('timer').style.color = '#e74c3c';
+                document.getElementById('timer').style.background = '#fde8e8';
+            } else if (timeLeft <= 30) {
+                document.getElementById('timer').style.color = '#f39c12';
+                document.getElementById('timer').style.background = '#fef5e7';
+            } else {
+                document.getElementById('timer').style.color = '#2c3e50';
+                document.getElementById('timer').style.background = '#f8f9fa';
+            }
         }
 
         function timeUp() {
@@ -1052,6 +1174,10 @@
         // Show final results
         function showResults() {
             clearInterval(timerInterval);
+            timerInterval = null;
+            
+            // Stop BGM
+            audioManager.stopBGM();
             
             // Hide quiz container
             document.getElementById('question-container').style.display = 'none';
@@ -1098,6 +1224,7 @@
                 improvementTips = `
                     <p>🎯 <strong>Excellent Performance!</strong> You have strong understanding of C programming.</p>
                     <p>📚 <strong>Next Steps:</strong> Practice advanced concepts and solve complex programming problems.</p>
+                    <p>✅ <strong>Strong Areas:</strong> ${strongTopics.join(', ')}</p>
                 `;
             } else if (score >= 60) {
                 improvementTips = `
@@ -1135,6 +1262,7 @@
         function restartQuiz() {
             currentQuestion = 0;
             score = 0;
+            quizStarted = true;
             
             // Reset topic scores
             Object.keys(topicScores).forEach(topic => {
@@ -1144,8 +1272,13 @@
             // Hide result screen
             document.getElementById('result-screen').classList.remove('show');
             
-            // Show quiz container
+            // Show quiz container and question
             document.getElementById('question-container').style.display = 'block';
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('start-screen').style.display = 'none';
+            
+            // Restart audio
+            audioManager.playBGM();
             
             // Reload first question
             loadQuestion();
@@ -1173,6 +1306,13 @@
         // Prevent context menu on mobile
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
+        });
+
+        // Add click event to entire document to enable audio
+        document.addEventListener('click', function() {
+            if (quizStarted && !audioManager.isBGMPlaying) {
+                audioManager.playBGM();
+            }
         });
     </script>
 </body>
